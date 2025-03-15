@@ -23,10 +23,13 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS
-app.use(cors({
-    origin: 'https://food-delivery-frontend-udc1-1kajjkhdw.vercel.app/', // Your frontend URL during development
-    credentials: true,               // Allow cookies and headers if needed
-}));
+// app.use(cors({
+//     origin: 'https://food-delivery-frontend-udc1-1kajjkhdw.vercel.app/', // Your frontend URL during development
+//     credentials: true,               // Allow cookies and headers if needed
+// }));
+
+app.use(cors());
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
