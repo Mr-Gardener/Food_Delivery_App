@@ -22,6 +22,11 @@ const app = express();
 
 app.use(express.json());
 
+// Enable CORS
+app.use(cors({
+    origin: 'https://food-delivery-frontend-udc1-1kajjkhdw.vercel.app/', // Your frontend URL during development
+    credentials: true,               // Allow cookies and headers if needed
+}));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -329,6 +334,7 @@ app.get('/api/orders/history', authenticate, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
 
 // Enable CORS
 app.use(cors({
