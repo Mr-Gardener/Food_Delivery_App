@@ -11,10 +11,9 @@ import Order from './models/Order.js';
 import upload from './middleware/multer.js';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
+import 'dotenv/config';
 
 
-
-dotenv.config();
 
 
 
