@@ -23,7 +23,7 @@ app.use(express.json());
 
 // Enable CORS
 app.use(cors({
-    origin: 'https://food-delivery-frontend-udc1.vercel.app', // Your frontend URL during development
+    origin: '*', // Your frontend URL during development
     credentials: true,               // Allow cookies and headers if needed
 }));
 
