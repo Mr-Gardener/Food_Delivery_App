@@ -333,7 +333,7 @@ const PORT = process.env.PORT || 5000;
 
 // Enable CORS
 app.use(cors({
-    origin: 'http://localhost:5173', // Your frontend URL during development
+    origin: 'https://food-delivery-frontend-udc1.vercel.app', // Your frontend URL during development
     credentials: true,               // Allow cookies and headers if needed
 }));
 
