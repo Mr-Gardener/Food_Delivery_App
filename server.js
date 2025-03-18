@@ -19,8 +19,6 @@
  dotenv.config();
  
  const app = express();
- 
- const cors = require('cors');
 
   // Enable CORS
   app.use(cors({
@@ -28,6 +26,12 @@
     credentials: true,  // Allow cookies and headers
     methods: "GET,POST,PUT,DELETE", // Allowed methods
 }));
+
+// Log CORS middleware application
+app.use((req, res, next) => {
+    console.log('CORS middleware applied');
+    next();
+});
 
  app.use(express.json());
  
