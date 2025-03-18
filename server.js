@@ -20,6 +20,8 @@
  
  const app = express();
  
+ const cors = require('cors');
+
   // Enable CORS
   app.use(cors({
     origin: process.env.FRONTEND_URL, 
