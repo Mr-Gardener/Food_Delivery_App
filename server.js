@@ -22,7 +22,7 @@
  
   // Enable CORS
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Switch to localhost in developemt
+    origin: process.env.FRONTEND_URL, 
     credentials: true,  // Allow cookies and headers
     methods: "GET,POST,PUT,DELETE", // Allowed methods
 }));
