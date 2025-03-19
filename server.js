@@ -27,13 +27,14 @@
     methods: "GET,POST,PUT,DELETE", // Allowed methods
 }));
 
+// log to debug CORS frontend URL
 console.log("Allowed Frontend URL:", process.env.FRONTEND_URL);
 
 // Log CORS middleware application
-app.use((req, res, next) => {
-    console.log('CORS middleware applied');
-    next();
-});
+// app.use((req, res, next) => {
+//     console.log('CORS middleware applied');
+//     next();
+// });
 
  app.use(express.json());
  
