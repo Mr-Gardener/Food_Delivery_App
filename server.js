@@ -27,15 +27,6 @@
     methods: "GET,POST,PUT,DELETE", // Allowed methods
 }));
 
-// log to debug CORS frontend URL
-console.log("Allowed Frontend URL:", process.env.FRONTEND_URL);
-
-// Log CORS middleware application
-// app.use((req, res, next) => {
-//     console.log('CORS middleware applied');
-//     next();
-// });
-
  app.use(express.json());
  
  
@@ -157,8 +148,10 @@ console.log("Allowed Frontend URL:", process.env.FRONTEND_URL);
  app.get('/api/restaurants', async (req, res) => {
      try {
          const restaurants = await Restaurant.find();
+         console.log("Fetched Restaurants:", restaurants);
          res.json(restaurants);
      } catch (err) {
+        console.error("Error fetching restaurants:", error);
          res.status(500).json({ error: 'Server error' });
      }
  });
