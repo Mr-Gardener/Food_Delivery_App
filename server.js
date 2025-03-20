@@ -40,8 +40,8 @@
  
      // Helper function to calculate total price
      const calculateTotalPrice = (items) => {
-        return items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
-    };    
+        return items.reduce((total, item) => total + ((item.price || 0) * (item.quantity || 1)), 0);
+    };   
  
      // User Registration Route
  app.post('/api/auth/register', async (req, res) => {
