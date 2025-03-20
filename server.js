@@ -28,12 +28,6 @@
 }));
 
  app.use(express.json());
-
- // Middleware to log requests
-app.use((req, res, next) => {
-    console.log(`📢 [${req.method}] ${req.url}`);
-    next();
-});
  
  
  // MongoDB Connection
@@ -45,9 +39,9 @@ app.use((req, res, next) => {
     .catch((err) => console.error("❌ MongoDB Connection Error:", err));
  
      // Helper function to calculate total price
- const calculateTotalPrice = (menu) => {
-     return menu.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
- };
+     const calculateTotalPrice = (items) => {
+        return items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
+    };    
  
      // User Registration Route
  app.post('/api/auth/register', async (req, res) => {
@@ -222,7 +216,7 @@ app.use((req, res, next) => {
  });
  
  // Place order endpoint
- app.post('/api/orders', authenticate, async (req, res) => {
+app.post('/api/orders', authenticate, async (req, res) => {
     const { items } = req.body;
 
     if (!items || items.length === 0) {
