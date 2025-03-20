@@ -223,22 +223,34 @@ app.use((req, res, next) => {
  
  // Place order endpoint
  app.post('/api/orders', authenticate, async (req, res) => {
-    console.log("🔍 Incoming Order Request:", req.body);
-    console.log("🛂 Authenticated User ID:", req.user?.id);
+    const { items } = req.body;
 
-     const { items } = req.body;
-     if (!items || items.length === 0) return res.status(400).json({ error: 'Items are required' });
- 
-     try {
-         const totalPrice = calculateTotalPrice(items);
-         const newOrder = new Order({ user: req.user.id, items, totalPrice });
-         await newOrder.save();
-         res.status(201).json({ message: 'Order placed successfully', orderId: newOrder._id });
-     } catch (err) {
+    if (!items || items.length === 0) {
+        return res.status(400).json({ error: 'Items are required to place an order' });
+    }
+
+    try {
+        const totalPrice = calculateTotalPrice(items);
+        const newOrder = new Order({
+            user: req.user.id,
+            items,
+            totalPrice
+        });
+
+        await newOrder.save();
+
+        // Return the full order details
+        res.status(201).json({
+            message: 'Order placed successfully',
+            order: newOrder  // Sends back the complete order object
+        });
+
+    } catch (err) {
         console.error("❌ Order Placement Error:", err);
-         res.status(500).json({ error: 'Server error' });
-     }
- });
+        res.status(500).json({ error: 'Internal Server Error. Please try again later.' });
+    }
+});
+
  
  // Order preview endpoint
  app.post('/api/orders/preview', authenticate, async (req, res) => {
