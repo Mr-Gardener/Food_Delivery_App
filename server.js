@@ -28,6 +28,12 @@
 }));
 
  app.use(express.json());
+
+ // Middleware to log requests
+app.use((req, res, next) => {
+    console.log(`📢 [${req.method}] ${req.url}`);
+    next();
+});
  
  
  // MongoDB Connection
@@ -192,6 +198,7 @@
          if (!restaurant) return res.status(404).json({ error: 'Restaurant not found' });
          res.json(restaurant);
      } catch (err) {
+
          res.status(500).json({ error: 'Server error' });
      }
  });
@@ -216,6 +223,9 @@
  
  // Place order endpoint
  app.post('/api/orders', authenticate, async (req, res) => {
+    console.log("🔍 Incoming Order Request:", req.body);
+    console.log("🛂 Authenticated User ID:", req.user?.id);
+
      const { items } = req.body;
      if (!items || items.length === 0) return res.status(400).json({ error: 'Items are required' });
  
@@ -225,6 +235,7 @@
          await newOrder.save();
          res.status(201).json({ message: 'Order placed successfully', orderId: newOrder._id });
      } catch (err) {
+        console.error("❌ Order Placement Error:", err);
          res.status(500).json({ error: 'Server error' });
      }
  });
@@ -350,3 +361,4 @@
  const PORT = process.env.PORT || 5000;
  
  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
