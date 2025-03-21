@@ -159,15 +159,22 @@ app.post('/api/restaurants', authenticate, upload.fields([
         // **Get restaurant image URL** from Cloudinary (if uploaded)
         const restaurantImage = req.files['restaurantImage'] ? req.files['restaurantImage'][0].path : '';
 
-        // **Parse menu JSON and attach images**
-        const parsedMenu = JSON.parse(menu).map((item, index) => ({
-            item: item.item,
-            price: item.price,
-            description: item.description,
-            image: req.files['menuImages'] && req.files['menuImages'][index] 
-                ? req.files['menuImages'][index].path 
-                : '' // Attach menu item image URL if uploaded
-        }));
+         // **Check if menu exists before parsing**
+         let parsedMenu = [];
+         if (menu) {
+             try {
+                 parsedMenu = JSON.parse(menu).map((item, index) => ({
+                     item: item.item,
+                     price: item.price,
+                     description: item.description,
+                     image: req.files['menuImages'] && req.files['menuImages'][index]
+                         ? req.files['menuImages'][index].path
+                         : '' // Attach menu item image URL if uploaded
+                 }));
+             } catch (error) {
+                 return res.status(400).json({ error: "Invalid menu format. Must be a JSON array." });
+             }
+         }
 
         // **Create restaurant**
         const restaurant = new Restaurant({
@@ -183,7 +190,7 @@ app.post('/api/restaurants', authenticate, upload.fields([
         await restaurant.save();
         res.status(201).json({ message: 'Restaurant added successfully', restaurant });
     } catch (err) {
-        console.error(err);
+        console.error("Error in adding restaurant:", err);
         res.status(500).json({ error: 'Server error' });
     }
 });
