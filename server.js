@@ -29,7 +29,6 @@
 
  app.use(express.json());
  
- 
  // MongoDB Connection
  mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -150,10 +149,10 @@ app.post('/api/restaurants', authenticate, upload.fields([
     { name: 'menuImages', maxCount: 10 } // Upload up to 10 menu images
 ]), async (req, res) => {
     try {
-        const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
+        const { name, location, cuisine, deliveryTime, menu } = req.body;
 
-        if (!name || !location || !cuisine || !rating || !deliveryTime) {
-            return res.status(400).json({ error: 'Name, location, cuisine, rating, and delivery time are required' });
+        if (!name || !location || !cuisine || !deliveryTime) {
+            return res.status(400).json({ error: 'Name, location, cuisine and delivery time are required' });
         }
 
         // **Get restaurant image URL** from Cloudinary (if uploaded)
@@ -167,9 +166,7 @@ app.post('/api/restaurants', authenticate, upload.fields([
                      item: item.item,
                      price: item.price,
                      description: item.description,
-                     image: req.files['menuImages'] && req.files['menuImages'][index]
-                         ? req.files['menuImages'][index].path
-                         : '' // Attach menu item image URL if uploaded
+                     menuImage: req.files['menuImages']?.find((_, i) => i === index)?.path || ''
                  }));
              } catch (error) {
                  return res.status(400).json({ error: "Invalid menu format. Must be a JSON array." });
@@ -183,14 +180,14 @@ app.post('/api/restaurants', authenticate, upload.fields([
             cuisine,
             rating,
             deliveryTime,
-            image: restaurantImage, // Save restaurant image URL
+            restaurantImage, // Save restaurant image URL
             menu: parsedMenu // Save menu with images
         });
 
         await restaurant.save();
         res.status(201).json({ message: 'Restaurant added successfully', restaurant });
     } catch (err) {
-        console.error("Error in adding restaurant:", err);
+        console.error("🔥 Error in adding restaurant:", err.message);
         res.status(500).json({ error: 'Server error' });
     }
 });
