@@ -144,53 +144,99 @@
 //  });
 
 // Add new restaurant with Cloudinary image upload
+// app.post('/api/restaurants', authenticate, upload.fields([
+//     { name: 'restaurantImage', maxCount: 1 },
+//     { name: 'menuImages', maxCount: 10 }
+// ]), async (req, res) => {
+//     try {
+//         const { name, location, cuisine, deliveryTime, menu } = req.body;
+
+//         if (!name || !location || !cuisine || !deliveryTime) {
+//             return res.status(400).json({ error: 'Name, location, cuisine, and delivery time are required' });
+//         }
+
+//         // ✅ Ensure correct restaurant image upload
+//         const restaurantImage = req.files['restaurantImage']?.[0]?.path || '';
+
+//         // ✅ Ensure correct menu parsing & image assignment
+//         let parsedMenu = [];
+//         if (menu) {
+//             try {
+//                 parsedMenu = JSON.parse(menu).map((item, index) => ({
+//                     item: item.item,
+//                     price: item.price,
+//                     description: item.description,
+//                     menuImage: req.files['menuImages']?.find((_, i) => i === index)?.path || ''
+//                 }));
+//             } catch (error) {
+//                 return res.status(400).json({ error: "Invalid menu format. Must be a JSON array." });
+//             }
+//         }
+
+//         // ✅ Save restaurant to database
+//         const restaurant = new Restaurant({
+//             name,
+//             location,
+//             cuisine,
+//             deliveryTime,
+//             restaurantImage,
+//             menu: parsedMenu
+//         });
+
+//         await restaurant.save();
+//         res.status(201).json({ message: 'Restaurant added successfully', restaurant });
+//     } catch (err) {
+//         console.error("🔥 Error in adding restaurant:", err.message);
+//         res.status(500).json({ error: 'Server error. Please try again.' });
+//     }
+// });
+
 app.post('/api/restaurants', authenticate, upload.fields([
-    { name: 'restaurantImage', maxCount: 1 }, // Upload 1 restaurant image
-    { name: 'menuImages', maxCount: 10 } // Upload up to 10 menu images
+    { name: 'restaurantImage', maxCount: 1 },
+    { name: 'menuImages', maxCount: 10 }
 ]), async (req, res) => {
     try {
-        const { name, location, cuisine, deliveryTime, menu } = req.body;
+        const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
 
-        if (!name || !location || !cuisine || !deliveryTime) {
-            return res.status(400).json({ error: 'Name, location, cuisine and delivery time are required' });
+        // Validate required fields
+        if (!name || !location || !cuisine || rating === undefined || !deliveryTime) {
+            return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // **Get restaurant image URL** from Cloudinary (if uploaded)
-        const restaurantImage = req.files['restaurantImage'] ? req.files['restaurantImage'][0].path : '';
+        // Parse menu JSON
+        let parsedMenu = [];
+        if (menu) {
+            try {
+                parsedMenu = JSON.parse(menu);
+            } catch (error) {
+                return res.status(400).json({ error: 'Invalid JSON format in menu' });
+            }
+        }
 
-         // **Check if menu exists before parsing**
-         let parsedMenu = [];
-         if (menu) {
-             try {
-                 parsedMenu = JSON.parse(menu).map((item, index) => ({
-                     item: item.item,
-                     price: item.price,
-                     description: item.description,
-                     menuImage: req.files['menuImages']?.find((_, i) => i === index)?.path || ''
-                 }));
-             } catch (error) {
-                 return res.status(400).json({ error: "Invalid menu format. Must be a JSON array." });
-             }
-         }
+        // Get uploaded images
+        const restaurantImage = req.files['restaurantImage'] ? req.files['restaurantImage'][0].path : "";
+        const menuImages = req.files['menuImages'] ? req.files['menuImages'].map(file => file.path) : [];
 
-        // **Create restaurant**
+        // Create restaurant
         const restaurant = new Restaurant({
             name,
             location,
             cuisine,
-            rating,
-            deliveryTime,
-            restaurantImage, // Save restaurant image URL
-            menu: parsedMenu // Save menu with images
+            rating: Number(rating), // Ensure rating is a number
+            deliveryTime: Number(deliveryTime),
+            menu: JSON.stringify(parsedMenu), // Store menu as JSON string
+            restaurantImage,
+            menuImages
         });
 
         await restaurant.save();
-        res.status(201).json({ message: 'Restaurant added successfully', restaurant });
+        res.status(201).json({ message: "Restaurant added successfully", restaurant });
     } catch (err) {
-        console.error("🔥 Error in adding restaurant:", err.message);
-        res.status(500).json({ error: 'Server error' });
+        console.error("Error in adding restaurant:", err); // Logs the actual error
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
  
  // Get all restaurants
  app.get('/api/restaurants', async (req, res) => {
