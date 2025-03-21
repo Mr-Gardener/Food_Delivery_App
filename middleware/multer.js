@@ -48,7 +48,7 @@ const storage = new CloudinaryStorage({
     params: async (req, file) => {
         return {
             folder: 'restaurant-uploads', // More general folder name
-            allowed_formats: ['jpg', 'png', 'jpeg'],
+            allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
             public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`, // Unique filename
         };
     },
