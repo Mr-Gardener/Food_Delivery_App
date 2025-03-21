@@ -145,28 +145,43 @@
 //  });
 
 // Add new restaurant with Cloudinary image upload
-app.post('/api/restaurants', authenticate, upload.single('image'), async (req, res) => {
-    const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
-
-    if (!name || !location || !cuisine || !rating || !deliveryTime) {
-        return res.status(400).json({ error: 'Name, location, cuisine, rating, and delivery time are required' });
-    }
-
+app.post('/api/restaurants', authenticate, upload.fields([
+    { name: 'restaurantImage', maxCount: 1 }, // Upload 1 restaurant image
+    { name: 'menuImages', maxCount: 10 } // Upload up to 10 menu images
+]), async (req, res) => {
     try {
-        const imageUrl = req.file ? req.file.path : null; // Cloudinary returns file path
+        const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
 
-        const newRestaurant = new Restaurant({
+        if (!name || !location || !cuisine || !rating || !deliveryTime) {
+            return res.status(400).json({ error: 'Name, location, cuisine, rating, and delivery time are required' });
+        }
+
+        // **Get restaurant image URL** from Cloudinary (if uploaded)
+        const restaurantImage = req.files['restaurantImage'] ? req.files['restaurantImage'][0].path : '';
+
+        // **Parse menu JSON and attach images**
+        const parsedMenu = JSON.parse(menu).map((item, index) => ({
+            item: item.item,
+            price: item.price,
+            description: item.description,
+            image: req.files['menuImages'] && req.files['menuImages'][index] 
+                ? req.files['menuImages'][index].path 
+                : '' // Attach menu item image URL if uploaded
+        }));
+
+        // **Create restaurant**
+        const restaurant = new Restaurant({
             name,
             location,
             cuisine,
-            rating: parseFloat(rating),
-            deliveryTime: parseInt(deliveryTime),
-            imageUrl, // Cloudinary URL
-            menu: menu ? JSON.parse(menu) : [],
+            rating,
+            deliveryTime,
+            image: restaurantImage, // Save restaurant image URL
+            menu: parsedMenu // Save menu with images
         });
 
-        await newRestaurant.save();
-        res.status(201).json({ message: 'Restaurant added successfully', newRestaurant });
+        await restaurant.save();
+        res.status(201).json({ message: 'Restaurant added successfully', restaurant });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
