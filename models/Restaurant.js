@@ -21,12 +21,12 @@
 import mongoose from 'mongoose';
 
 const restaurantSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    location: { type: String, required: true },
-    cuisine: { type: String, required: true },
-    rating: { type: Number, default: 0, min: 0, max: 5 }, // Rating from 0 to 5
-    deliveryTime: { type: Number, required: true },
-    image: { type: String },
+    name: String, 
+    location: String, 
+    cuisine:String,
+    rating:Number, 
+    deliveryTime:Number, 
+    image:String ,
     menu: [
         {
             item: String,
