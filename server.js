@@ -191,17 +191,26 @@
 //     }
 // });
 
+app.post('/api/restaurants', (req, res, next) => {
+    console.log("📢 Restaurant route hit!");
+    next();
+});
+
+
 app.post('/api/restaurants', authenticate, upload.fields([
     { name: 'restaurantImage', maxCount: 1 },
     { name: 'menuImages', maxCount: 10 }
 ]), async (req, res) => {
     try {
-        console.log("Incoming request body:", JSON.stringify(req.body, null, 2));
-        console.log("Uploaded files:", JSON.stringify(req.files, null, 2));
+        console.log("📢 Incoming request received!");
+
+        console.log("✅ Request body:", req.body);
+        console.log("✅ Uploaded files:", req.files);
 
         const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
 
         if (!name || !location || !cuisine || rating === undefined || !deliveryTime) {
+            console.log("❌ Missing required fields");
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
@@ -210,16 +219,18 @@ app.post('/api/restaurants', authenticate, upload.fields([
             try {
                 parsedMenu = JSON.parse(menu);
             } catch (error) {
+                console.log("❌ Invalid JSON in menu");
                 return res.status(400).json({ error: 'Invalid JSON format in menu' });
             }
         }
 
+        console.log("✅ Parsed menu:", parsedMenu);
+
         const restaurantImage = req.files['restaurantImage'] ? req.files['restaurantImage'][0].path : "";
         const menuImages = req.files['menuImages'] ? req.files['menuImages'].map(file => file.path) : [];
 
-        console.log("Parsed menu:", JSON.stringify(parsedMenu, null, 2));
-        console.log("Restaurant image URL:", restaurantImage);
-        console.log("Menu images URLs:", JSON.stringify(menuImages, null, 2));
+        console.log("✅ Restaurant image URL:", restaurantImage);
+        console.log("✅ Menu images URLs:", menuImages);
 
         const restaurant = new Restaurant({
             name,
@@ -232,10 +243,13 @@ app.post('/api/restaurants', authenticate, upload.fields([
             menuImages
         });
 
+        console.log("🟢 Saving restaurant to database...");
         await restaurant.save();
+        console.log("✅ Restaurant saved successfully");
+
         res.status(201).json({ message: "Restaurant added successfully", restaurant });
     } catch (err) {
-        console.error("Error in adding restaurant:", err);
+        console.error("❌ Error in adding restaurant:", err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
