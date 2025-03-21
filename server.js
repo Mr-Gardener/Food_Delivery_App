@@ -145,7 +145,7 @@
 //  });
 
 // Add new restaurant with Cloudinary image upload
-router.post('/api/restaurants', authenticate, upload.single('image'), async (req, res) => {
+app.post('/api/restaurants', authenticate, upload.single('image'), async (req, res) => {
     const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
 
     if (!name || !location || !cuisine || !rating || !deliveryTime) {
