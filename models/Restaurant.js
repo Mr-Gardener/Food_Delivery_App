@@ -25,6 +25,9 @@ const restaurantSchema = new mongoose.Schema({
     location: { type: String, required: true },
     cuisine: { type: String, required: true },
     imageUrl: { type: String }, // <-- Store Cloudinary image URL
+    rating: { type: Number, default: 0, min: 0, max: 5 }, // Rating from 0 to 5
+    deliveryTime: { type: Number, required: true },
+    image: { type: String },
     menu: [
         {
             item: { type: String, required: true },
