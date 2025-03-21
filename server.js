@@ -127,22 +127,51 @@
  // Restaurant Management(Add, edit, and delete restaurants)
  
  // Add a new restaurant
- app.post('/api/restaurants', authenticate, async (req, res) => {
-     const { name, location, cuisine, menu } = req.body;
+//  app.post('/api/restaurants', authenticate, async (req, res) => {
+//      const { name, location, cuisine, menu } = req.body;
  
-     if (!name || !location || !cuisine) {
-         return res.status(400).json({ error: 'Name, location, and cuisine are required' });
-     }
+//      if (!name || !location || !cuisine) {
+//          return res.status(400).json({ error: 'Name, location, and cuisine are required' });
+//      }
  
-     try {
-         const newRestaurant = new Restaurant({ name, location, cuisine, menu });
-         await newRestaurant.save();
-         res.status(201).json({ message: 'Restaurant added successfully', newRestaurant });
-     } catch (err) {
-         console.error(err); // Log the error to terminal if not adding restaurants to debug easily
-         res.status(500).json({ error: 'Server error' });
-     }
- });
+//      try {
+//          const newRestaurant = new Restaurant({ name, location, cuisine, menu });
+//          await newRestaurant.save();
+//          res.status(201).json({ message: 'Restaurant added successfully', newRestaurant });
+//      } catch (err) {
+//          console.error(err); // Log the error to terminal if not adding restaurants to debug easily
+//          res.status(500).json({ error: 'Server error' });
+//      }
+//  });
+
+// Add new restaurant with Cloudinary image upload
+router.post('/api/restaurants', authenticate, upload.single('image'), async (req, res) => {
+    const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
+
+    if (!name || !location || !cuisine || !rating || !deliveryTime) {
+        return res.status(400).json({ error: 'Name, location, cuisine, rating, and delivery time are required' });
+    }
+
+    try {
+        const imageUrl = req.file ? req.file.path : null; // Cloudinary returns file path
+
+        const newRestaurant = new Restaurant({
+            name,
+            location,
+            cuisine,
+            rating: parseFloat(rating),
+            deliveryTime: parseInt(deliveryTime),
+            imageUrl, // Cloudinary URL
+            menu: menu ? JSON.parse(menu) : [],
+        });
+
+        await newRestaurant.save();
+        res.status(201).json({ message: 'Restaurant added successfully', newRestaurant });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
  
  // Get all restaurants
  app.get('/api/restaurants', async (req, res) => {
