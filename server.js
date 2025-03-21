@@ -196,14 +196,15 @@ app.post('/api/restaurants', authenticate, upload.fields([
     { name: 'menuImages', maxCount: 10 }
 ]), async (req, res) => {
     try {
+        console.log("Incoming request body:", JSON.stringify(req.body, null, 2));
+        console.log("Uploaded files:", JSON.stringify(req.files, null, 2));
+
         const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
 
-        // Validate required fields
         if (!name || !location || !cuisine || rating === undefined || !deliveryTime) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Parse menu JSON
         let parsedMenu = [];
         if (menu) {
             try {
@@ -213,18 +214,20 @@ app.post('/api/restaurants', authenticate, upload.fields([
             }
         }
 
-        // Get uploaded images
         const restaurantImage = req.files['restaurantImage'] ? req.files['restaurantImage'][0].path : "";
         const menuImages = req.files['menuImages'] ? req.files['menuImages'].map(file => file.path) : [];
 
-        // Create restaurant
+        console.log("Parsed menu:", JSON.stringify(parsedMenu, null, 2));
+        console.log("Restaurant image URL:", restaurantImage);
+        console.log("Menu images URLs:", JSON.stringify(menuImages, null, 2));
+
         const restaurant = new Restaurant({
             name,
             location,
             cuisine,
-            rating: Number(rating), // Ensure rating is a number
+            rating: Number(rating),
             deliveryTime: Number(deliveryTime),
-            menu: JSON.stringify(parsedMenu), // Store menu as JSON string
+            menu: JSON.stringify(parsedMenu),
             restaurantImage,
             menuImages
         });
@@ -232,10 +235,11 @@ app.post('/api/restaurants', authenticate, upload.fields([
         await restaurant.save();
         res.status(201).json({ message: "Restaurant added successfully", restaurant });
     } catch (err) {
-        console.error("Error in adding restaurant:", err); // Logs the actual error
+        console.error("Error in adding restaurant:", err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
  
  // Get all restaurants
