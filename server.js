@@ -204,8 +204,9 @@ app.post('/api/restaurants', authenticate, upload.fields([
     try {
         console.log("📢 Incoming request received!");
 
-        console.log("✅ Request body:", req.body);
-        console.log("✅ Uploaded files:", req.files);
+        console.log("✅ Request body:", JSON.stringify(req.body, null, 2));
+        console.log("✅ Uploaded files:", JSON.stringify(req.files, null, 2));
+
 
         const { name, location, cuisine, rating, deliveryTime, menu } = req.body;
 
