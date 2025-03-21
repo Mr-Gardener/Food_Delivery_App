@@ -125,79 +125,9 @@
  
  // Restaurant Management(Add, edit, and delete restaurants)
  
- // Add a new restaurant
-//  app.post('/api/restaurants', authenticate, async (req, res) => {
-//      const { name, location, cuisine, menu } = req.body;
- 
-//      if (!name || !location || !cuisine) {
-//          return res.status(400).json({ error: 'Name, location, and cuisine are required' });
-//      }
- 
-//      try {
-//          const newRestaurant = new Restaurant({ name, location, cuisine, menu });
-//          await newRestaurant.save();
-//          res.status(201).json({ message: 'Restaurant added successfully', newRestaurant });
-//      } catch (err) {
-//          console.error(err); // Log the error to terminal if not adding restaurants to debug easily
-//          res.status(500).json({ error: 'Server error' });
-//      }
-//  });
-
-// Add new restaurant with Cloudinary image upload
-// app.post('/api/restaurants', authenticate, upload.fields([
-//     { name: 'restaurantImage', maxCount: 1 },
-//     { name: 'menuImages', maxCount: 10 }
-// ]), async (req, res) => {
-//     try {
-//         const { name, location, cuisine, deliveryTime, menu } = req.body;
-
-//         if (!name || !location || !cuisine || !deliveryTime) {
-//             return res.status(400).json({ error: 'Name, location, cuisine, and delivery time are required' });
-//         }
-
-//         // ✅ Ensure correct restaurant image upload
-//         const restaurantImage = req.files['restaurantImage']?.[0]?.path || '';
-
-//         // ✅ Ensure correct menu parsing & image assignment
-//         let parsedMenu = [];
-//         if (menu) {
-//             try {
-//                 parsedMenu = JSON.parse(menu).map((item, index) => ({
-//                     item: item.item,
-//                     price: item.price,
-//                     description: item.description,
-//                     menuImage: req.files['menuImages']?.find((_, i) => i === index)?.path || ''
-//                 }));
-//             } catch (error) {
-//                 return res.status(400).json({ error: "Invalid menu format. Must be a JSON array." });
-//             }
-//         }
-
-//         // ✅ Save restaurant to database
-//         const restaurant = new Restaurant({
-//             name,
-//             location,
-//             cuisine,
-//             deliveryTime,
-//             restaurantImage,
-//             menu: parsedMenu
-//         });
-
-//         await restaurant.save();
-//         res.status(201).json({ message: 'Restaurant added successfully', restaurant });
-//     } catch (err) {
-//         console.error("🔥 Error in adding restaurant:", err.message);
-//         res.status(500).json({ error: 'Server error. Please try again.' });
-//     }
-// });
-
-
 // ✅ Route to Add a New Restaurant
-app.post('/api/restaurants', upload.single('restaurantImage'), async (req, res) => {
+app.post('/api/restaurants', authenticate, upload.single('restaurantImage'), async (req, res) => {
     try {
-        console.log("📢 Restaurant creation request received!");
-        console.log("✅ Request Body:", req.body);
-        console.log("✅ Uploaded File:", req.file);
 
         const { name, location, cuisine, rating, deliveryTime } = req.body;
 
@@ -345,34 +275,65 @@ app.post('/api/orders', authenticate, async (req, res) => {
  // Restaurant Menu Management
 
  // Add a new menu item
- app.post('/api/restaurants/:id/menu', authenticate, upload.single('image'), async (req, res) => {
-     const { id } = req.params;
-     const { item, price, description } = req.body;
+//  app.post('/api/restaurants/:id/menu', authenticate, upload.single('image'), async (req, res) => {
+//      const { id } = req.params;
+//      const { item, price, description } = req.body;
  
-     if (!item || !price || !description || !req.file) {
-         return res.status(400).json({ error: 'Item, price, description, and image are required' });
-     }
+//      if (!item || !price || !description || !req.file) {
+//          return res.status(400).json({ error: 'Item, price, description, and image are required' });
+//      }
  
-     try {
-         const restaurant = await Restaurant.findById(id);
-         if (!restaurant) {
-             return res.status(404).json({ error: 'Restaurant not found' });
-         }
+//      try {
+//          const restaurant = await Restaurant.findById(id);
+//          if (!restaurant) {
+//              return res.status(404).json({ error: 'Restaurant not found' });
+//          }
  
-         const imageUrl = req.file.path;
+//          const imageUrl = req.file.path;
  
  
-         // Push new menu item to restaurant menu
-         restaurant.menu.push({ item, price, description, image: imageUrl });
-         await restaurant.save();
+//          // Push new menu item to restaurant menu
+//          restaurant.menu.push({ item, price, description, image: imageUrl });
+//          await restaurant.save();
          
-         res.json({ message: 'Menu item added with image', restaurant });
-     } catch (err) {
-         console.error('Server error:', err);  // Log the error to terminal if not adding menu to debug easily
-         res.status(500).json({ error: 'Server error', details: err.message });
-     }
- });
- 
+//          res.json({ message: 'Menu item added with image', restaurant });
+//      } catch (err) {
+//          console.error('Server error:', err);  // Log the error to terminal if not adding menu to debug easily
+//          res.status(500).json({ error: 'Server error', details: err.message });
+//      }
+//  });
+
+app.post('/api/restaurants/:id/menu', authenticate, upload.single('image'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { item, price, description } = req.body;
+
+        if (!item || !price || !description || !req.file) {
+            return res.status(400).json({ error: 'Item, price, description, and image are required' });
+        }
+
+        const restaurant = await Restaurant.findById(id);
+        if (!restaurant) {
+            return res.status(404).json({ error: 'Restaurant not found' });
+        }
+
+        const imageUrl = req.file.path;
+
+        // Add new menu item to the restaurant
+        const newMenuItem = { item, price: Number(price), description, image: imageUrl };
+        restaurant.menu.push(newMenuItem);
+        await restaurant.save();
+
+        console.log(`✅ Menu item added to restaurant: ${restaurant.name}`);
+        console.log("🖼️ Image URL:", imageUrl);
+
+        res.status(201).json({ message: 'Menu item added successfully', menuItem: newMenuItem });
+    } catch (err) {
+        console.error("❌ Error adding menu item:", err);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    }
+});
+
  
  // Update menu item image
  app.put('/api/restaurants/:restaurantId/menu/:itemId', authenticate, upload.single('image'), async (req, res) => {
