@@ -9,8 +9,8 @@ const restaurantSchema = new mongoose.Schema({
     restaurantImage: { type: String },
     menu: [
         {
-            item: { type: String, required: true },
-            price: { type: Number, required: true },
+            item: { type: String },
+            price: { type: Number},
             description: { type: String },
             menuImages: { type: String } // <-- If menu items have their own images
         }
