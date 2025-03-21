@@ -191,17 +191,13 @@
 //     }
 // });
 
-app.post('/api/restaurants', (req, res, next) => {
-    console.log("📢 Restaurant route hit!");
-    next();
-});
-
 
 app.post('/api/restaurants', authenticate, upload.fields([
     { name: 'restaurantImage', maxCount: 1 },
     { name: 'menuImages', maxCount: 10 }
 ]), async (req, res) => {
     try {
+        console.log("📢 Restaurant route hit!");
         console.log("📢 Incoming request received!");
 
         console.log("✅ Request body:", JSON.stringify(req.body, null, 2));
